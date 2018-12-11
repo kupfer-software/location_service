@@ -1,0 +1,49 @@
+version: "3.1"
+
+services:
+
+  postgres_location_service:
+    container_name: postgres_location_service
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U postgres"
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    image: postgres:10.4-alpine
+    environment:
+      POSTGRES_DB: location_service
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    volumes:
+      - /var/lib/postgresql/data/
+    restart: always
+
+  location_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: bash /code/docker-entrypoint-dev.sh
+    container_name: location_service
+    image: location_service
+    volumes:
+      - .:/code
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres_location_service
+    environment:
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      CORS_ORIGIN_WHITELIST: localhost,127.0.0.1
+      DATABASE_ENGINE: "postgresql"
+      DATABASE_NAME: "location_service"
+      DATABASE_USER: "root"
+      DATABASE_PASSWORD: "root"
+      DATABASE_HOST: "postgres_location_service"
+      DATABASE_PORT: "5432"
+      DEBUG: "True"
+      JWT_PUBLIC_KEY_RSA_ACTIVITYAPI: |-
+        -----BEGIN PUBLIC KEY-----
+        MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALFc9NFZaOaSwUMPNektbtJqEjYZ6IRB
+        qhqvJu1hKPYn9HYd75c0gIDYHJ9lb7QwQvg44aO27104rDK0xSstzL0CAwEAAQ==
+        -----END PUBLIC KEY-----
+      STATIC_ROOT: /static/
