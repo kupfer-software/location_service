@@ -40,9 +40,8 @@ INSTALLED_APPS_DJANGO = [
 ]
 
 INSTALLED_APPS_THIRD_PARTIES = [
+    'django_countries',
     'rest_framework',
-    'rest_framework.authtoken',
-    'django_filters',
 
     # Health check
     'health_check',
