@@ -41,6 +41,7 @@ INSTALLED_APPS_DJANGO = [
 
 INSTALLED_APPS_THIRD_PARTIES = [
     'django_countries',
+    'drf_yasg',
     'rest_framework',
 
     # Health check
