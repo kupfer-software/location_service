@@ -24,6 +24,7 @@ urlpatterns = [
             schema_view.without_ui(cache_timeout=0),
             name='docs-swagger-raw'),
     path('health_check/', include('health_check.urls')),
+    path('', include((router.urls, 'app_name'), namespace='location')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

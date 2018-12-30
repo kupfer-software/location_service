@@ -41,6 +41,7 @@ INSTALLED_APPS_DJANGO = [
 
 INSTALLED_APPS_THIRD_PARTIES = [
     'django_countries',
+    'django_filters',
     'drf_yasg',
     'rest_framework',
 
@@ -128,9 +129,9 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
-USE_I18N = True
+USE_I18N = False
 
-USE_L10N = True
+USE_L10N = False
 
 USE_TZ = True
 
@@ -140,23 +141,30 @@ USE_TZ = True
 
 STATIC_URL = os.getenv('STATIC_URL', '/static/')
 
-STATIC_ROOT = os.getenv('STATIC_ROOT', 'static/')
+
+# Log in URL
+
+LOGIN_URL = 'admin:login'
 
 
 # Rest Framework
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',),
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'oauth2_provider_jwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'api.permissions.AllowOptionsAuthentication',
-    )
+    # Pagination
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
+    'PAGE_SIZE': 30,
+    'MAX_PAGE_SIZE': 30,
+    'PAGE_SIZE_QUERY_PARAM': 'page_size',
 }
+
 
 # JWT Configuration
 
