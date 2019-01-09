@@ -178,7 +178,7 @@ class ProfileTypeUpdateViewsTest(TestCase):
         self.profiletype = ProfileType.objects.create(
             name='Nämé', organization_uuid=self.organization_uuid)
 
-    def testupdate_successfully(self):
+    def test_update_successfully(self):
         data = {
             'name': 'Nëw Náme',
         }
@@ -190,7 +190,7 @@ class ProfileTypeUpdateViewsTest(TestCase):
         profiletype = ProfileType.objects.get(pk=self.profiletype.pk)
         self.assertEqual(profiletype.name, data['name'])
 
-    def testupdate_missing_data(self):
+    def test_update_missing_data(self):
         request = self.factory.post('', {})
         request.session = self.session
         view = ProfileTypeViewSet.as_view({'post': 'update'})
@@ -199,7 +199,7 @@ class ProfileTypeUpdateViewsTest(TestCase):
         self.assertEqual(str(response.data['name'][0]),
                          'This field is required.')
 
-    def test_delete_not_allowed(self):
+    def test_update_not_allowed(self):
         data = {
             'name': 'Nëw Náme',
         }
@@ -213,7 +213,7 @@ class ProfileTypeUpdateViewsTest(TestCase):
         self.assertTrue(
             ProfileType.objects.filter(pk=self.profiletype.pk).exists())
 
-    def test_delete_missing_auth(self):
+    def test_update_missing_auth(self):
         request = self.factory.post('', {})
         view = ProfileTypeViewSet.as_view({'post': 'update'})
         response = view(request, pk=self.profiletype.pk)
