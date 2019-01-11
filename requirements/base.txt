@@ -3,6 +3,6 @@ django-countries>5.3<5.4
 django-filter>2.0<2.1
 django-health-check==3.6.1
 drf-yasg>1.11<1.12
-git+https://github.com/Humanitec/django-oauth-toolkit-jwt@v0.4.0#egg=django-oauth-toolkit-jwt
+git+https://github.com/Humanitec/django-oauth-toolkit-jwt@v0.5.2#egg=django-oauth-toolkit-jwt
 djangorestframework>3.9<3.10
 psycopg2-binary==2.7.5
