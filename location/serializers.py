@@ -4,6 +4,10 @@ from . import models
 
 class ProfileTypeSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
+    organization_uuid = serializers.CharField(
+        required=False,
+        help_text='Any value sent will be ignored and will be just taken '
+                  'from JWT payload')
 
     class Meta:
         model = models.ProfileType
@@ -12,6 +16,10 @@ class ProfileTypeSerializer(serializers.ModelSerializer):
 
 class SiteProfileSerializer(serializers.ModelSerializer):
     uuid = serializers.ReadOnlyField()
+    organization_uuid = serializers.CharField(
+        required=False,
+        help_text='Any value sent will be ignored and will be just taken '
+                  'from JWT payload')
 
     class Meta:
         model = models.SiteProfile
