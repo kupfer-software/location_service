@@ -60,7 +60,7 @@ class SiteProfileViewSet(viewsets.ModelViewSet):
         return queryset
 
     def _extend_request(self, request):
-        data = request.POST.copy()
+        data = request.data.copy()
         data['organization_uuid'] = request.session['jwt_organization_uuid']
         request_extended = Request(HttpRequest())
         request_extended._full_data = data
