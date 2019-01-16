@@ -493,6 +493,53 @@ class SiteProfileCreateViewsTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
+class SiteProfileUpdateViewsTest(TestCase):
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.organization_uuid = str(uuid.uuid4())
+        self.session = {
+            'jwt_organization_uuid': self.organization_uuid,
+        }
+        self.profiletype = ProfileType.objects.create(
+            name='Nämé', organization_uuid=self.organization_uuid)
+        self.siteprofile = SiteProfile.objects.create(
+            name='Initial Námë',
+            profiletype=self.profiletype,
+            organization_uuid=self.organization_uuid)
+
+    def test_update_successfully(self):
+        data = {
+            'uuid': str(uuid.uuid4()),
+            'name': 'Námê Updated',
+            'country': 'ES',
+            'profiletype': self.profiletype.pk,
+        }
+        request = self.factory.post('', data)
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'post': 'update'})
+        response = view(request, pk=self.siteprofile.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['name'], data['name'])
+        self.assertEqual(response.data['country'], data['country'])
+
+    def test_update_missing_params(self):
+        request = self.factory.post('', {})
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'post': 'update'})
+        response = view(request, pk=self.siteprofile.pk)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(str(response.data['profiletype'][0]),
+                         'This field is required.')
+        self.assertEqual(str(response.data['country'][0]),
+                         'This field is required.')
+
+    def test_update_missing_auth(self):
+        request = self.factory.post('', {})
+        view = SiteProfileViewSet.as_view({'post': 'update'})
+        response = view(request, pk=self.siteprofile.pk)
+        self.assertEqual(response.status_code, 403)
+
+
 class SiteProfileDeleteViewsTest(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
