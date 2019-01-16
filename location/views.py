@@ -70,6 +70,10 @@ class SiteProfileViewSet(viewsets.ModelViewSet):
         request_extended = self._extend_request(request)
         return super().create(request_extended, *args, **kwargs)
 
+    def update(self, request, *args, **kwargs):
+        request_extended = self._extend_request(request)
+        return super().update(request_extended, *args, **kwargs)
+
     queryset = SiteProfile.objects.all()
     permission_classes = (OrganizationPermission,)
     serializer_class = SiteProfileSerializer
