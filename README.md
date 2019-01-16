@@ -41,3 +41,9 @@ To run bash:
 ```bash
 docker-compose run --rm --entrypoint 'bash' location_service
 ```
+
+If you would like to clean the database and start the application, do:
+
+```bash
+docker-compose up --renew-anon-volumes --force-recreate --build
+```
