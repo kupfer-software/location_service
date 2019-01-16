@@ -23,7 +23,7 @@ class SiteProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.SiteProfile
-        exclude = ['id']
+        fields = '__all__'
 
     def validate_profiletype(self, value):
         if (self.initial_data['organization_uuid'] !=

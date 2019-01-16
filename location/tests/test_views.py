@@ -318,6 +318,7 @@ class SiteProfileListViewsTest(TestCase):
         response = view(request)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 3)
+        self.assertNotIn('id', response.data['results'][0])
         self.assertEqual(response.data['results'][0]['name'], 'A-Ñáme')
         self.assertEqual(response.data['results'][0]['address_line1'], 'A-al1')
         self.assertEqual(response.data['results'][1]['name'], 'B-Ñáme')

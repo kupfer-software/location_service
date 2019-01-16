@@ -15,7 +15,7 @@ class ProfileType(models.Model):
 
 
 class SiteProfile(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     name = models.CharField(max_length=255, blank=True)
     profiletype = models.ForeignKey(ProfileType, on_delete=models.CASCADE)
     address_line1 = models.CharField('Address line 1', max_length=255, blank=True)
