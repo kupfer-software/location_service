@@ -1,6 +1,7 @@
 from decimal import Decimal
 import uuid
 
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django_countries.fields import CountryField
 
@@ -35,3 +36,7 @@ class SiteProfile(models.Model):
     organization_uuid = models.UUIDField('Organization UUID')
     create_date = models.DateTimeField(auto_now_add=True)
     edit_date = models.DateTimeField(auto_now=True)
+
+    workflowlevel2_uuid = ArrayField(
+        models.UUIDField(), blank=True, null=True,
+        help_text='List of WorkflowLevel2s')

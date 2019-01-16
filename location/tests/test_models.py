@@ -80,4 +80,5 @@ class SiteProfileTest(TestCase):
             latitude='40.4637',
             longitude='3.7492',
             notes='Patio interior',
-            organization_uuid=uuid.uuid4())
+            organization_uuid=uuid.uuid4(),
+            workflowlevel2_uuid=[uuid.uuid4()],)
