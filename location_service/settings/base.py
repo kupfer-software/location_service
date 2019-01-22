@@ -162,8 +162,8 @@ REST_FRAMEWORK = {
     ),
     # Pagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
-    'PAGE_SIZE': 30,
-    'MAX_PAGE_SIZE': 30,
+    'PAGE_SIZE': int(os.getenv('PAGE_SIZE', 30)),
+    'MAX_PAGE_SIZE': int(os.getenv('MAX_PAGE_SIZE', 100)),
     'PAGE_SIZE_QUERY_PARAM': 'page_size',
 }
 
