@@ -28,11 +28,11 @@ services:
     volumes:
       - .:/code
     ports:
-      - "8080:8080"
+      - "8004:8080"
     depends_on:
       - postgres_location_service
     environment:
-      ALLOWED_HOSTS: localhost,127.0.0.1
+      ALLOWED_HOSTS: "*"
       CORS_ORIGIN_WHITELIST: localhost,127.0.0.1
       DATABASE_ENGINE: "postgresql"
       DATABASE_NAME: "location_service"
