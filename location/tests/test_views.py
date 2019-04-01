@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIRequestFactory
 
+from . import model_factories as mfactories
 from ..models import ProfileType, SiteProfile
 from ..views import ProfileTypeViewSet, SiteProfileViewSet
 
@@ -388,6 +389,17 @@ class SiteProfileListViewsTest(TestCase):
         view = SiteProfileViewSet.as_view({'get': 'list'})
         response = view(request)
         self.assertEqual(response.status_code, 403)
+
+    def test_list_siteprofiles_pagination_limit(self):
+        mfactories.SiteProfile.create_batch(
+            size=51, **{'organization_uuid': self.organization_uuid})
+        request = self.factory.get('')
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'get': 'list'})
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 50)
+        self.assertEqual(response.data['next'], 'http://testserver/?limit=50&offset=50')
 
 
 class SiteProfileCreateViewsTest(TestCase):
