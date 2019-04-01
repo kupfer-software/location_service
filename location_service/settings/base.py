@@ -160,10 +160,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'oauth2_provider_jwt.authentication.JWTAuthentication',
     ),
-    # Pagination
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
-    'PAGE_SIZE': int(os.getenv('PAGE_SIZE', 30)),
-    'MAX_PAGE_SIZE': int(os.getenv('MAX_PAGE_SIZE', 100)),
+    'DEFAULT_PAGINATION_CLASS': 'location.pagination.DefaultLimitOffsetPagination',
 }
 
 
