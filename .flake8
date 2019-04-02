@@ -1,2 +1,0 @@
-[flake8]
-exclude = models.py,settings,migrations,manage.py,wsgi.py
