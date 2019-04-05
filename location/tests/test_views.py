@@ -401,6 +401,54 @@ class SiteProfileListViewsTest(TestCase):
         self.assertEqual(len(response.data['results']), 50)
         self.assertEqual(response.data['next'], 'http://testserver/?limit=50&offset=50')
 
+    def test_several_workflowlevel2_uuids_filter(self):
+        wfl2_1, wfl2_2, wfl2_3 = uuid.uuid4(), uuid.uuid4(), uuid.uuid4()
+        mfactories.SiteProfile.create(
+            workflowlevel2_uuid=[wfl2_1, ],
+            organization_uuid=self.organization_uuid)
+        mfactories.SiteProfile.create(
+            workflowlevel2_uuid=[wfl2_2, wfl2_1, ],
+            organization_uuid=self.organization_uuid)
+        mfactories.SiteProfile.create(
+            workflowlevel2_uuid=[wfl2_2, wfl2_3, ],
+            organization_uuid=self.organization_uuid)
+        mfactories.SiteProfile.create(
+            workflowlevel2_uuid=[uuid.uuid4(), ],
+            organization_uuid=self.organization_uuid)
+        request = self.factory.get(f'?workflowlevel2_uuid={wfl2_1},{wfl2_2}')
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'get': 'list'})
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 3)
+
+    def test_search_everywhere_in_search_fields(self):
+        sp1 = mfactories.SiteProfile.create(
+            name='work',
+            organization_uuid=self.organization_uuid,
+            address_line1='Wöhlertstr. 14', city='Berlin', postcode='10115')
+        sp2 = mfactories.SiteProfile.create(
+            name='somewhere',
+            organization_uuid=self.organization_uuid,
+            address_line1='Chausseestr. 1', city='Berlin', postcode='10116')
+        sp3 = mfactories.SiteProfile.create(
+            name='focus focus focus',
+            organization_uuid=self.organization_uuid,
+            address_line1='Milkstr. 1', city='Galaxis', postcode='10101')
+        request = self.factory.get('?search=erlin')
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'get': 'list'})
+        response = view(request)
+        self.assertEqual(len(response.data['results']), 2)
+        results = [sp['uuid'] for sp in response.data['results']]
+        self.assertIn(sp1.uuid, results)
+        self.assertIn(sp2.uuid, results)
+        request = self.factory.get('?search=Merlin')
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'get': 'list'})
+        response = view(request)
+        self.assertEqual(len(response.data['results']), 0)
+
 
 class SiteProfileCreateViewsTest(TestCase):
     def setUp(self):
