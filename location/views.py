@@ -1,12 +1,13 @@
 from django.http import HttpRequest
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as django_filters
 from rest_framework import viewsets
-from rest_framework.filters import OrderingFilter
+from rest_framework import filters as drf_filters
 from rest_framework.request import Request
 
 from .models import ProfileType, SiteProfile
 from .permissions import OrganizationPermission
 from .serializers import ProfileTypeSerializer, SiteProfileSerializer
+from . import filters
 
 
 class ProfileTypeViewSet(viewsets.ModelViewSet):
@@ -39,7 +40,7 @@ class ProfileTypeViewSet(viewsets.ModelViewSet):
     queryset = ProfileType.objects.all()
     permission_classes = (OrganizationPermission,)
     serializer_class = ProfileTypeSerializer
-    filter_backends = (OrderingFilter,)
+    filter_backends = (drf_filters.OrderingFilter,)
     ordering = ('name',)
 
 
@@ -74,9 +75,10 @@ class SiteProfileViewSet(viewsets.ModelViewSet):
         request_extended = self._extend_request(request)
         return super().update(request_extended, *args, **kwargs)
 
-    queryset = SiteProfile.objects.all()
-    permission_classes = (OrganizationPermission,)
-    serializer_class = SiteProfileSerializer
-    filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filter_fields = ('profiletype__id',)
+    filter_backends = (django_filters.DjangoFilterBackend,
+                       drf_filters.OrderingFilter)
+    filter_class = filters.SiteProfileFilter
     ordering = ('name',)
+    permission_classes = (OrganizationPermission,)
+    queryset = SiteProfile.objects.all()
+    serializer_class = SiteProfileSerializer

@@ -401,6 +401,27 @@ class SiteProfileListViewsTest(TestCase):
         self.assertEqual(len(response.data['results']), 50)
         self.assertEqual(response.data['next'], 'http://testserver/?limit=50&offset=50')
 
+    def test_several_workflowlevel2_uuids_filter(self):
+        wfl2_1, wfl2_2, wfl2_3 = uuid.uuid4(), uuid.uuid4(), uuid.uuid4()
+        mfactories.SiteProfile.create(
+            workflowlevel2_uuid=[wfl2_1, ],
+            organization_uuid=self.organization_uuid)
+        mfactories.SiteProfile.create(
+            workflowlevel2_uuid=[wfl2_2, wfl2_1, ],
+            organization_uuid=self.organization_uuid)
+        mfactories.SiteProfile.create(
+            workflowlevel2_uuid=[wfl2_2, wfl2_3, ],
+            organization_uuid=self.organization_uuid)
+        mfactories.SiteProfile.create(
+            workflowlevel2_uuid=[uuid.uuid4(), ],
+            organization_uuid=self.organization_uuid)
+        request = self.factory.get(f'?workflowlevel2_uuid={wfl2_1},{wfl2_2}')
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'get': 'list'})
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 3)
+
 
 class SiteProfileCreateViewsTest(TestCase):
     def setUp(self):
