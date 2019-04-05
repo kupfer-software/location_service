@@ -76,9 +76,11 @@ class SiteProfileViewSet(viewsets.ModelViewSet):
         return super().update(request_extended, *args, **kwargs)
 
     filter_backends = (django_filters.DjangoFilterBackend,
+                       drf_filters.SearchFilter,
                        drf_filters.OrderingFilter)
     filter_class = filters.SiteProfileFilter
     ordering = ('name',)
     permission_classes = (OrganizationPermission,)
     queryset = SiteProfile.objects.all()
     serializer_class = SiteProfileSerializer
+    search_fields = ('address_line1', 'postcode', 'city', )
