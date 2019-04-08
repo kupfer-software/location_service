@@ -31,3 +31,20 @@ class SiteProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Invalid ProfileType. It should belong to your organization')
         return value
+
+    def validate(self, attrs):
+        """Validate that at least one of the defined fields is filled."""
+        one_of_required_fields = (
+            'name',
+            'country',
+            'city',
+            'latitude',
+            'longitude',
+            'address_line1',
+            'address_line2',
+            'address_line3',
+            'address_line4',
+        )
+        if not set(one_of_required_fields).intersection(attrs.keys()):
+            raise serializers.ValidationError(f'One of {one_of_required_fields} must be defined.')
+        return super().validate(attrs)

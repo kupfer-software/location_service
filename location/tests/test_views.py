@@ -541,8 +541,7 @@ class SiteProfileCreateViewsTest(TestCase):
         view = SiteProfileViewSet.as_view({'post': 'create'})
         response = view(request)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(str(response.data['country'][0]),
-                         'This field is required.')
+        self.assertIn('non_field_errors', response.data)
 
     def test_create_missing_auth(self):
         request = self.factory.post('', {})
@@ -586,8 +585,7 @@ class SiteProfileUpdateViewsTest(TestCase):
         view = SiteProfileViewSet.as_view({'post': 'update'})
         response = view(request, pk=self.siteprofile.pk)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(str(response.data['country'][0]),
-                         'This field is required.')
+        self.assertIn('non_field_errors', response.data)
 
     def test_update_missing_auth(self):
         request = self.factory.post('', {})
