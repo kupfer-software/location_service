@@ -24,7 +24,7 @@ class SiteProfile(models.Model):
     address_line4 = models.CharField('Address line 4', max_length=255, blank=True)
     postcode = models.CharField(max_length=20, blank=True)
     city = models.CharField(max_length=85, blank=True)
-    country = CountryField(blank=True)
+    country = CountryField(blank=True, null=True)
     administrative_level1 = models.CharField('Administrative division (First level)', max_length=255, blank=True)
     administrative_level2 = models.CharField('Administrative division (Second level)', max_length=255, blank=True)
     administrative_level3 = models.CharField('Administrative division (Third level)', max_length=255, blank=True)
