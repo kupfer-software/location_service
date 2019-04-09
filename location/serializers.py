@@ -1,4 +1,7 @@
 from rest_framework import serializers
+from django_countries.serializer_fields import CountryField
+from django_countries import Countries
+
 from . import models
 
 
@@ -14,12 +17,20 @@ class ProfileTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class CountriesWithBlank(Countries):
+    """Add empty Country for having the blank choice in the swagger docs."""
+    override = [
+        ('', ''),
+    ]
+
+
 class SiteProfileSerializer(serializers.ModelSerializer):
     uuid = serializers.ReadOnlyField()
     organization_uuid = serializers.CharField(
         required=False,
         help_text='Any value sent will be ignored and will be just taken '
                   'from JWT payload')
+    country = CountryField(required=False, countries=CountriesWithBlank())
 
     class Meta:
         model = models.SiteProfile
