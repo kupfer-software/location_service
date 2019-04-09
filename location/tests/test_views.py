@@ -549,6 +549,23 @@ class SiteProfileCreateViewsTest(TestCase):
         response = view(request)
         self.assertEqual(response.status_code, 403)
 
+    def test_create_siteprofile_with_no_country(self):
+        profiletype = ProfileType.objects.create(
+            name='any', organization_uuid=self.organization_uuid)
+        data = {
+            'profiletype': profiletype.pk,
+            "latitude": 51.06297558851499,
+        }
+        request = self.factory.post('', data)
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'post': 'create'})
+        response = view(request)
+        self.assertEqual(response.status_code, 201)
+
+        siteprofile = SiteProfile.objects.get(uuid=str(response.data['uuid']))
+        self.assertEqual(float(siteprofile.latitude), data['latitude'])
+        self.assertEqual(siteprofile.profiletype.pk, data['profiletype'])
+
 
 class SiteProfileUpdateViewsTest(TestCase):
     def setUp(self):
