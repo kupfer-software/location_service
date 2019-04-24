@@ -13,7 +13,7 @@ from . import filters
 class ProfileTypeViewSet(viewsets.ModelViewSet):
     """
     ProfileType helps grouping SiteProfiles together. For example, a
-    ProfileType called 'billing' can be created to clasify all billing
+    ProfileType called 'billing' can be created to classify all billing
     addresses stored.
     """
     def get_queryset(self):
