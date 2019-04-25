@@ -1,8 +1,9 @@
 from django.http import HttpRequest
 from django_filters import rest_framework as django_filters
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework import filters as drf_filters
 from rest_framework.request import Request
+from rest_framework.response import Response
 
 from .models import ProfileType, SiteProfile
 from .permissions import OrganizationPermission
@@ -31,7 +32,11 @@ class ProfileTypeViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         request_extended = self._extend_request(request)
-        return super().create(request_extended, *args, **kwargs)
+        serializer = self.get_serializer(data=request_extended.data)
+        serializer.is_valid(raise_exception=True)
+        organization_uuid = request.session['jwt_organization_uuid']
+        serializer.save(organization_uuid=organization_uuid)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         request_extended = self._extend_request(request)
@@ -69,7 +74,11 @@ class SiteProfileViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         request_extended = self._extend_request(request)
-        return super().create(request_extended, *args, **kwargs)
+        serializer = self.get_serializer(data=request_extended.data)
+        serializer.is_valid(raise_exception=True)
+        organization_uuid = request.session['jwt_organization_uuid']
+        serializer.save(organization_uuid=organization_uuid)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         request_extended = self._extend_request(request)

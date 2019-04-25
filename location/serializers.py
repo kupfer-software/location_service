@@ -6,15 +6,11 @@ from . import models
 
 
 class ProfileTypeSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField()
-    organization_uuid = serializers.CharField(
-        required=False,
-        help_text='Any value sent will be ignored and will be just taken '
-                  'from JWT payload')
 
     class Meta:
         model = models.ProfileType
         fields = '__all__'
+        read_only_fields = ('id', 'organization_uuid', )
 
 
 class CountriesWithBlank(Countries):
@@ -25,16 +21,12 @@ class CountriesWithBlank(Countries):
 
 
 class SiteProfileSerializer(serializers.ModelSerializer):
-    uuid = serializers.ReadOnlyField()
-    organization_uuid = serializers.CharField(
-        required=False,
-        help_text='Any value sent will be ignored and will be just taken '
-                  'from JWT payload')
     country = CountryField(required=False, countries=CountriesWithBlank())
 
     class Meta:
         model = models.SiteProfile
         fields = '__all__'
+        read_only_fields = ('uuid', 'organization_uuid', )
 
     def validate_profiletype(self, value):
         if (self.initial_data['organization_uuid'] !=
