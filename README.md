@@ -22,7 +22,7 @@ A _SiteProfile_ is a representation of a location. It has the following properti
 - **address_line4**: Fourth address line of the SiteProfile.
 - **postcode**: Postal code of the SiteProfile.
 - **city**: City of the SiteProfile.
-- **country**: Country of the SiteProfile.
+- **country**: Country of the SiteProfile as a two-char ISO code.
 - **administrative_level1**: Administrative division (First level).
 - **administrative_level2**: Administrative division (Second level).
 - **administrative_level3**: Administrative division (Third level).
@@ -85,12 +85,12 @@ Run a web server with this service:
 docker-compose up
 ```
 
-Now, open your browser and go to [http://localhost:8080](http://localhost:8080).
+Now, open your browser and go to [http://localhost:8004](http://localhost:8004).
 
-For the admin panel, go to [http://localhost:8080/admin](http://localhost:8080/admin)
+For the admin panel, go to [http://localhost:8004/admin](http://localhost:8004/admin)
 (user: `admin`, password: `admin`).
 
-The local API documentation can be consulted in `http://localhost:8080/docs`.
+The local API documentation can be consulted in `http://localhost:8004/docs`.
 
 ### Run tests
 
