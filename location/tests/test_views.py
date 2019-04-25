@@ -431,7 +431,7 @@ class SiteProfileListViewsTest(TestCase):
             name='somewhere',
             organization_uuid=self.organization_uuid,
             address_line1='Chausseestr. 1', city='Berlin', postcode='10116')
-        sp3 = mfactories.SiteProfile.create(
+        mfactories.SiteProfile.create(
             name='focus focus focus',
             organization_uuid=self.organization_uuid,
             address_line1='Milkstr. 1', city='Galaxis', postcode='10101')
@@ -441,8 +441,8 @@ class SiteProfileListViewsTest(TestCase):
         response = view(request)
         self.assertEqual(len(response.data['results']), 2)
         results = [sp['uuid'] for sp in response.data['results']]
-        self.assertIn(sp1.uuid, results)
-        self.assertIn(sp2.uuid, results)
+        self.assertIn(str(sp1.uuid), results)
+        self.assertIn(str(sp2.uuid), results)
         request = self.factory.get('?search=Merlin')
         request.session = self.session
         view = SiteProfileViewSet.as_view({'get': 'list'})

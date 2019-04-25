@@ -19,9 +19,7 @@ class ProfileTypeOptionsViewsTest(TestCase):
         # reverse() would be better
         response = self.client.get('/docs/swagger.json')
         self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            b'"info": {"title": "Location Service API", "version": "latest"}',
-            response.content)
+        self.assertIn('Location Service', str(response.content))
 
         # reverse() would be better
         response = self.client.get('/docs/swagger.yaml')
