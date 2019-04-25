@@ -11,19 +11,25 @@ from .serializers import ProfileTypeSerializer, SiteProfileSerializer
 from . import filters
 
 
-class ProfileTypeViewSet(viewsets.ModelViewSet):
+class OrganizationQuerySetMixin(object):
     """
-    ProfileType helps grouping SiteProfiles together. For example, a
-    ProfileType called 'billing' can be created to classify all billing
-    addresses stored.
+    Adds functionality to return a queryset filtered by the organization_uuid in the JWT header.
+    If no jwt header is given, an empty queryset will be returned.
     """
     def get_queryset(self):
         queryset = super().get_queryset()
-        organization_uuid = self.request.session['jwt_organization_uuid']
-        queryset = queryset.filter(organization_uuid=organization_uuid)
-        return queryset
+        organization_uuid = self.request.session.get('jwt_organization_uuid', None)
+        if not organization_uuid:
+            return queryset.none()
+        return queryset.filter(organization_uuid=organization_uuid)
 
-    def _extend_request(self, request):
+
+class OrganizationExtensionMixin(object):
+    """
+    Extends the data with the organization from the JWT header for creation and validation in the serializer.
+    """
+    @staticmethod
+    def _extend_request(request):
         data = request.data.copy()
         data['organization_uuid'] = request.session['jwt_organization_uuid']
         request_extended = Request(HttpRequest())
@@ -34,13 +40,22 @@ class ProfileTypeViewSet(viewsets.ModelViewSet):
         request_extended = self._extend_request(request)
         serializer = self.get_serializer(data=request_extended.data)
         serializer.is_valid(raise_exception=True)
-        organization_uuid = request.session['jwt_organization_uuid']
-        serializer.save(organization_uuid=organization_uuid)
+        serializer.save(organization_uuid=request_extended.data['organization_uuid'])
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         request_extended = self._extend_request(request)
         return super().update(request_extended, *args, **kwargs)
+
+
+class ProfileTypeViewSet(OrganizationQuerySetMixin,
+                         OrganizationExtensionMixin,
+                         viewsets.ModelViewSet):
+    """
+    ProfileType helps grouping SiteProfiles together. For example, a
+    ProfileType called 'billing' can be created to classify all billing
+    addresses stored.
+    """
 
     queryset = ProfileType.objects.all()
     permission_classes = (OrganizationPermission,)
@@ -49,7 +64,9 @@ class ProfileTypeViewSet(viewsets.ModelViewSet):
     ordering = ('name',)
 
 
-class SiteProfileViewSet(viewsets.ModelViewSet):
+class SiteProfileViewSet(OrganizationQuerySetMixin,
+                         OrganizationExtensionMixin,
+                         viewsets.ModelViewSet):
     """
     SiteProfile can be used to store any international address thanks to the
     flexible schema provided.
@@ -59,30 +76,6 @@ class SiteProfileViewSet(viewsets.ModelViewSet):
 
     The `country` field is a two-char ISO code.
     """
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        organization_uuid = self.request.session['jwt_organization_uuid']
-        queryset = queryset.filter(organization_uuid=organization_uuid)
-        return queryset
-
-    def _extend_request(self, request):
-        data = request.data.copy()
-        data['organization_uuid'] = request.session['jwt_organization_uuid']
-        request_extended = Request(HttpRequest())
-        request_extended._full_data = data
-        return request_extended
-
-    def create(self, request, *args, **kwargs):
-        request_extended = self._extend_request(request)
-        serializer = self.get_serializer(data=request_extended.data)
-        serializer.is_valid(raise_exception=True)
-        organization_uuid = request.session['jwt_organization_uuid']
-        serializer.save(organization_uuid=organization_uuid)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def update(self, request, *args, **kwargs):
-        request_extended = self._extend_request(request)
-        return super().update(request_extended, *args, **kwargs)
 
     filter_backends = (django_filters.DjangoFilterBackend,
                        drf_filters.SearchFilter,
