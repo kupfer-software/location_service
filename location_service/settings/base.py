@@ -170,3 +170,9 @@ REST_FRAMEWORK = {
 
 JWT_AUTH_DISABLED = True
 JWT_PUBLIC_KEY_RSA_BIFROST = os.getenv('JWT_PUBLIC_KEY_RSA_BIFROST')
+
+# Swagger settings - for generate_swagger management command
+
+SWAGGER_SETTINGS = {
+    'DEFAULT_INFO': 'location_service.urls.swagger_info',
+}
