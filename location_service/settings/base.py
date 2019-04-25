@@ -42,12 +42,14 @@ INSTALLED_APPS_DJANGO = [
 INSTALLED_APPS_THIRD_PARTIES = [
     'django_countries',
     'django_filters',
-    'drf_yasg',
     'rest_framework',
 
     # Health check
     'health_check',
     'health_check.db',
+
+    # Swagger/OpenAPI
+    'drf_yasg',
 ]
 
 INSTALLED_APPS_LOCAL = [
