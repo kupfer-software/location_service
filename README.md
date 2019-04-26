@@ -1,3 +1,8 @@
++++
+title = "Location service (Django)"
+api_url = "marketplace/location-service"
++++
+
 # Location service (Django)
 
 ## Summary
