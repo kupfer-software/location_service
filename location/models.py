@@ -49,7 +49,7 @@ class SiteProfile(models.Model):
     create_date = models.DateTimeField(auto_now_add=True, help_text='Timestamp when the SiteProfile was created (set automatically, ISO format)')
     edit_date = models.DateTimeField(auto_now=True, help_text='Timestamp when the SiteProfile was last modified (set automatically, ISO format)')
 
-    workflowlevel2_uuid = ArrayField(models.UUIDField(), blank=True, null=True, help_text='Array of WorkflowLevel2s associated with the SiteProfile.')
+    workflowlevel2_uuid = ArrayField(models.CharField(max_length=36), blank=True, null=True, help_text='Array of WorkflowLevel2s associated with the SiteProfile.')
 
     class Meta:
         indexes = [

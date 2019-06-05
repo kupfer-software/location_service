@@ -27,8 +27,4 @@ class Migration(migrations.Migration):
             name='uuid',
             field=models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
         ),
-        migrations.AddIndex(
-            model_name='siteprofile',
-            index=django.contrib.postgres.indexes.GinIndex(fields=['workflowlevel2_uuid'], name='location_si_workflo_768d25_gin'),
-        ),
     ]
