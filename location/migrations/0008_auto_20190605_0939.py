@@ -12,6 +12,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL("DROP INDEX IF EXISTS location_si_workflo_768d25_gin"),
         migrations.AlterField(
             model_name='siteprofile',
             name='workflowlevel2_uuid',
