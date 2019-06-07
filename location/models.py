@@ -17,6 +17,7 @@ class ProfileType(models.Model):
     organization_uuid = models.UUIDField('Organization UUID', db_index=True, help_text='ID of the organization that has access to the ProfileType.')
     create_date = models.DateTimeField(auto_now_add=True, help_text='Timestamp when the SiteProfile was created (automatically set, ISO format).')
     edit_date = models.DateTimeField(auto_now=True, help_text='Timestamp when the SiteProfile was last modified (automatically set, ISO format).')
+    is_global = models.BooleanField(default=False, help_text="All organizations have access to global ProfileTypes.")
 
 
 class SiteProfile(models.Model):

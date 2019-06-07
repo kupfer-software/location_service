@@ -1,5 +1,6 @@
 import re
 
+from django.db.models import Q
 from django.http import HttpRequest
 from django_filters import rest_framework as django_filters
 from rest_framework import viewsets, status
@@ -96,6 +97,22 @@ class ProfileTypeViewSet(OrganizationQuerySetMixin,
 
     Deletes the ProfileType with the given ID.
     """
+
+    def list(self, request, *args, **kwargs):
+        """
+        Filter for organization only if query-param is_global=False or
+        for organization AND global ProfileTypes.
+        """
+        if not request.query_params.get('is_global', 'false').lower() == 'true':
+            queryset = ProfileType.objects.all().filter(
+                Q(organization_uuid=self.request.session['jwt_organization_uuid']) |
+                Q(is_global=True))
+        else:
+            queryset = super().get_queryset()
+        queryset = self.filter_queryset(queryset)
+        queryset = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(queryset, many=True)
+        return self.get_paginated_response(serializer.data)
 
     queryset = ProfileType.objects.all()
     permission_classes = (OrganizationPermission,)
