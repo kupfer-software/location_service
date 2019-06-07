@@ -1,8 +1,10 @@
+import json
 from decimal import Decimal
 import uuid
 
 from django.test import TestCase
 from django.urls import reverse
+from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIRequestFactory
 
 from . import model_factories as mfactories
@@ -38,6 +40,17 @@ class ProfileTypeListViewsTest(TestCase):
         self.assertEqual(len(response.data['results']), 0)
         self.assertIsNone(response.data['next'])
         self.assertIsNone(response.data['previous'])
+
+    def test_valid_organization_uuid_in_session_fail(self):
+        request = self.factory.get('')
+        request.session = {
+            'jwt_organization_uuid': 'invalid_uuid',
+        }
+        view = ProfileTypeViewSet.as_view({'get': 'list'})
+        response = view(request).render()
+        self.assertIn("organization_uuid", json.loads(response.content)[0])
+        self.assertIn( "invalid_uuid", json.loads(response.content)[0])
+        self.assertEqual(response.status_code, 400)
 
     def test_list_ordering_default(self):
         for name in ('C', 'A', 'B'):
