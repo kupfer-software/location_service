@@ -1,7 +1,10 @@
+import re
+
 from django.http import HttpRequest
 from django_filters import rest_framework as django_filters
 from rest_framework import viewsets, status
 from rest_framework import filters as drf_filters
+from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -16,11 +19,22 @@ class OrganizationQuerySetMixin(object):
     Adds functionality to return a queryset filtered by the organization_uuid in the JWT header.
     If no jwt header is given, an empty queryset will be returned.
     """
+
+    @staticmethod
+    def _valid_uuid4(uuid_string):
+        uuid4hex = re.compile('^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}\Z', re.I)
+        match = uuid4hex.match(uuid_string)
+        return bool(match)
+
     def get_queryset(self):
         queryset = super().get_queryset()
         organization_uuid = self.request.session.get('jwt_organization_uuid', None)
         if not organization_uuid:
             return queryset.none()
+        if not self._valid_uuid4(organization_uuid):
+            raise ValidationError(
+                f'organization_uuid from JWT Token "{organization_uuid}" is not a valid UUID.'
+            )
         return queryset.filter(organization_uuid=organization_uuid)
 
 
