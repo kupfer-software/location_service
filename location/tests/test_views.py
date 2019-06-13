@@ -49,7 +49,7 @@ class ProfileTypeListViewsTest(TestCase):
         view = ProfileTypeViewSet.as_view({'get': 'list'})
         response = view(request).render()
         self.assertIn("organization_uuid", json.loads(response.content)[0])
-        self.assertIn( "invalid_uuid", json.loads(response.content)[0])
+        self.assertIn("invalid_uuid", json.loads(response.content)[0])
         self.assertEqual(response.status_code, 400)
 
     def test_list_ordering_default(self):
