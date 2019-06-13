@@ -1,10 +1,9 @@
-import re
 
+from django.db.models import Q
 from django.http import HttpRequest
 from django_filters import rest_framework as django_filters
 from rest_framework import viewsets, status
 from rest_framework import filters as drf_filters
-from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -20,21 +19,11 @@ class OrganizationQuerySetMixin(object):
     If no jwt header is given, an empty queryset will be returned.
     """
 
-    @staticmethod
-    def _valid_uuid4(uuid_string):
-        uuid4hex = re.compile('^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}\Z', re.I)
-        match = uuid4hex.match(uuid_string)
-        return bool(match)
-
     def get_queryset(self):
         queryset = super().get_queryset()
         organization_uuid = self.request.session.get('jwt_organization_uuid', None)
         if not organization_uuid:
             return queryset.none()
-        if not self._valid_uuid4(organization_uuid):
-            raise ValidationError(
-                f'organization_uuid from JWT Token "{organization_uuid}" is not a valid UUID.'
-            )
         return queryset.filter(organization_uuid=organization_uuid)
 
 
@@ -96,6 +85,22 @@ class ProfileTypeViewSet(OrganizationQuerySetMixin,
 
     Deletes the ProfileType with the given ID.
     """
+
+    def list(self, request, *args, **kwargs):
+        """
+        Filter for organization only if query-param is_global=False or
+        for organization AND global ProfileTypes.
+        """
+        if not request.query_params.get('is_global', 'false').lower() == 'true':
+            queryset = ProfileType.objects.all().filter(
+                Q(organization_uuid=self.request.session['jwt_organization_uuid']) |
+                Q(is_global=True))
+        else:
+            queryset = super().get_queryset()
+        queryset = self.filter_queryset(queryset)
+        queryset = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(queryset, many=True)
+        return self.get_paginated_response(serializer.data)
 
     queryset = ProfileType.objects.all()
     permission_classes = (OrganizationPermission,)

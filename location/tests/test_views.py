@@ -49,7 +49,7 @@ class ProfileTypeListViewsTest(TestCase):
         view = ProfileTypeViewSet.as_view({'get': 'list'})
         response = view(request).render()
         self.assertIn("organization_uuid", json.loads(response.content)[0])
-        self.assertIn( "invalid_uuid", json.loads(response.content)[0])
+        self.assertIn("invalid_uuid", json.loads(response.content)[0])
         self.assertEqual(response.status_code, 400)
 
     def test_list_ordering_default(self):
@@ -102,6 +102,24 @@ class ProfileTypeListViewsTest(TestCase):
         view = ProfileTypeViewSet.as_view({'get': 'list'})
         response = view(request)
         self.assertEqual(response.status_code, 403)
+
+    def test_list_global_profiletypes(self):
+        ProfileType.objects.create(
+            name='1 Organization ProfileType',
+            organization_uuid=self.organization_uuid)
+        ProfileType.objects.create(
+            name='2 global with another organization_uuid',
+            organization_uuid=uuid.uuid4(),
+            is_global=True
+        )
+        request = self.factory.get('')
+        request.session = self.session
+        view = ProfileTypeViewSet.as_view({'get': 'list'})
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 2)
+        self.assertEqual(response.data['results'][0]['name'], '1 Organization ProfileType')
+        self.assertEqual(response.data['results'][1]['name'], '2 global with another organization_uuid')
 
 
 class ProfileTypeRetrieveViewsTest(TestCase):
