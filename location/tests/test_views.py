@@ -453,6 +453,19 @@ class SiteProfileListViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 3)
 
+    def test_several_uuids_filter(self):
+        siteprofiles = mfactories.SiteProfile.create_batch(size=5,
+                                                           organization_uuid=self.organization_uuid)
+        request = self.factory.get(f'?uuid={str(siteprofiles[0].uuid)},{str(siteprofiles[4].uuid)}')
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'get': 'list'})
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 2)
+        uuid_results = set([response.data['results'][0]['uuid'], response.data['results'][1]['uuid']])
+        self.assertIn(str(siteprofiles[0].uuid), uuid_results)
+        self.assertIn(str(siteprofiles[4].uuid), uuid_results)
+
     def test_search_everywhere_in_search_fields(self):
         sp1 = mfactories.SiteProfile.create(
             name='work',
