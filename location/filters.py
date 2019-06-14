@@ -17,7 +17,8 @@ class BaseInArrayFilter(django_filters.BaseInFilter):
 
 class SiteProfileFilter(django_filters.FilterSet):
     workflowlevel2_uuid = BaseInArrayFilter()
+    uuid = django_filters.BaseInFilter()
 
     class Meta:
         model = SiteProfile
-        fields = ('profiletype__id',)
+        fields = ('profiletype__id', 'uuid', 'workflowlevel2_uuid', )
