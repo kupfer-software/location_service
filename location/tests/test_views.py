@@ -121,6 +121,26 @@ class ProfileTypeListViewsTest(TestCase):
         self.assertEqual(response.data['results'][0]['name'], '1 Organization ProfileType')
         self.assertEqual(response.data['results'][1]['name'], '2 global with another organization_uuid')
 
+    def test_list_filter_global_profiletypes(self):
+        profile_type_global = mfactories.ProfileType(is_global=True)
+        mfactories.ProfileType(
+            name="batmans profile type",
+            organization_uuid=self.organization_uuid,
+        )
+
+        self.assertEqual(ProfileType.objects.count(), 2)
+        self.assertEqual(ProfileType.objects.filter(is_global=True).count(), 1)
+
+        request = self.factory.get('?is_global=true')
+        request.session = self.session
+
+        view = ProfileTypeViewSet.as_view({'get': 'list'})
+        response = view(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['id'], profile_type_global.pk)
+
 
 class ProfileTypeRetrieveViewsTest(TestCase):
     def setUp(self):

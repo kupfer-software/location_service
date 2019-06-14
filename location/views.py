@@ -96,7 +96,7 @@ class ProfileTypeViewSet(OrganizationQuerySetMixin,
                 Q(organization_uuid=self.request.session['jwt_organization_uuid']) |
                 Q(is_global=True))
         else:
-            queryset = super().get_queryset()
+            queryset = ProfileType.objects.all().filter(is_global=True)
         queryset = self.filter_queryset(queryset)
         queryset = self.paginate_queryset(queryset)
         serializer = self.get_serializer(queryset, many=True)
@@ -105,7 +105,9 @@ class ProfileTypeViewSet(OrganizationQuerySetMixin,
     queryset = ProfileType.objects.all()
     permission_classes = (OrganizationPermission,)
     serializer_class = ProfileTypeSerializer
-    filter_backends = (drf_filters.OrderingFilter,)
+    filter_backends = (django_filters.DjangoFilterBackend,
+                       drf_filters.OrderingFilter,)
+    filter_fields = ('is_global', )
     ordering = ('name',)
 
 
