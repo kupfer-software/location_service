@@ -34,8 +34,10 @@ class SiteProfileSerializer(serializers.ModelSerializer):
         # back when FE has removed it from POST
 
     def validate_profiletype(self, value):
-        if (self.initial_data['organization_uuid'] !=
-                str(value.organization_uuid)):
+        """ProfileType should be on the same organization except for global ProfileTypes."""
+        if value.is_global:
+            return value
+        if (self.initial_data['organization_uuid'] != str(value.organization_uuid)):
             raise serializers.ValidationError(
                 'Invalid ProfileType. It should belong to your organization')
         return value

@@ -579,6 +579,22 @@ class SiteProfileCreateViewsTest(TestCase):
             str(response.data['profiletype'][0]),
             'Invalid ProfileType. It should belong to your organization')
 
+    def test_create_accepted_global_profiletype_different_org(self):
+        profiletype = ProfileType.objects.create(
+            name='any', organization_uuid=uuid.uuid4(), is_global=True,
+        )
+        data = {
+            'country': 'ES',
+            'profiletype': profiletype.pk,
+        }
+        request = self.factory.post('', data)
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'post': 'create'})
+        response = view(request)
+        self.assertEqual(response.status_code, 201)
+        siteprofile = SiteProfile.objects.get(uuid=str(response.data['uuid']))
+        self.assertEqual(siteprofile.profiletype.pk, data['profiletype'])
+
     def test_create_missing_param(self):
         request = self.factory.post('', {})
         request.session = self.session
