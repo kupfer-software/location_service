@@ -21,6 +21,7 @@ class CountriesWithBlank(Countries):
 
 
 class SiteProfileSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(source='uuid', read_only=True)
     country = CountryField(required=False, countries=CountriesWithBlank())
     organization_uuid = serializers.CharField(  # ToDo: remove organization_uuid when FE has removed it from POST
         required=False,
