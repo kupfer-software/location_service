@@ -1,8 +1,10 @@
+import json
 from decimal import Decimal
 import uuid
 
 from django.test import TestCase
 from django.urls import reverse
+from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIRequestFactory
 
 from . import model_factories as mfactories
@@ -38,6 +40,17 @@ class ProfileTypeListViewsTest(TestCase):
         self.assertEqual(len(response.data['results']), 0)
         self.assertIsNone(response.data['next'])
         self.assertIsNone(response.data['previous'])
+
+    def test_valid_organization_uuid_in_session_fail(self):
+        request = self.factory.get('')
+        request.session = {
+            'jwt_organization_uuid': 'invalid_uuid',
+        }
+        view = ProfileTypeViewSet.as_view({'get': 'list'})
+        response = view(request).render()
+        self.assertIn("organization_uuid", json.loads(response.content)[0])
+        self.assertIn("invalid_uuid", json.loads(response.content)[0])
+        self.assertEqual(response.status_code, 400)
 
     def test_list_ordering_default(self):
         for name in ('C', 'A', 'B'):
@@ -89,6 +102,44 @@ class ProfileTypeListViewsTest(TestCase):
         view = ProfileTypeViewSet.as_view({'get': 'list'})
         response = view(request)
         self.assertEqual(response.status_code, 403)
+
+    def test_list_global_profiletypes(self):
+        ProfileType.objects.create(
+            name='1 Organization ProfileType',
+            organization_uuid=self.organization_uuid)
+        ProfileType.objects.create(
+            name='2 global with another organization_uuid',
+            organization_uuid=uuid.uuid4(),
+            is_global=True
+        )
+        request = self.factory.get('')
+        request.session = self.session
+        view = ProfileTypeViewSet.as_view({'get': 'list'})
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 2)
+        self.assertEqual(response.data['results'][0]['name'], '1 Organization ProfileType')
+        self.assertEqual(response.data['results'][1]['name'], '2 global with another organization_uuid')
+
+    def test_list_filter_global_profiletypes(self):
+        profile_type_global = mfactories.ProfileType(is_global=True)
+        mfactories.ProfileType(
+            name="batmans profile type",
+            organization_uuid=self.organization_uuid,
+        )
+
+        self.assertEqual(ProfileType.objects.count(), 2)
+        self.assertEqual(ProfileType.objects.filter(is_global=True).count(), 1)
+
+        request = self.factory.get('?is_global=true')
+        request.session = self.session
+
+        view = ProfileTypeViewSet.as_view({'get': 'list'})
+        response = view(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['id'], profile_type_global.pk)
 
 
 class ProfileTypeRetrieveViewsTest(TestCase):
@@ -319,7 +370,7 @@ class SiteProfileListViewsTest(TestCase):
         response = view(request)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 3)
-        self.assertNotIn('id', response.data['results'][0])
+        self.assertIn('id', response.data['results'][0])
         self.assertEqual(response.data['results'][0]['name'], 'A-Ñáme')
         self.assertEqual(response.data['results'][0]['address_line1'], 'A-al1')
         self.assertEqual(response.data['results'][1]['name'], 'B-Ñáme')
@@ -421,6 +472,19 @@ class SiteProfileListViewsTest(TestCase):
         response = view(request)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 3)
+
+    def test_several_uuids_filter(self):
+        siteprofiles = mfactories.SiteProfile.create_batch(size=5,
+                                                           organization_uuid=self.organization_uuid)
+        request = self.factory.get(f'?uuid={str(siteprofiles[0].uuid)},{str(siteprofiles[4].uuid)}')
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'get': 'list'})
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 2)
+        uuid_results = set([response.data['results'][0]['uuid'], response.data['results'][1]['uuid']])
+        self.assertIn(str(siteprofiles[0].uuid), uuid_results)
+        self.assertIn(str(siteprofiles[4].uuid), uuid_results)
 
     def test_search_everywhere_in_search_fields(self):
         sp1 = mfactories.SiteProfile.create(
@@ -534,6 +598,22 @@ class SiteProfileCreateViewsTest(TestCase):
         self.assertEqual(
             str(response.data['profiletype'][0]),
             'Invalid ProfileType. It should belong to your organization')
+
+    def test_create_accepted_global_profiletype_different_org(self):
+        profiletype = ProfileType.objects.create(
+            name='any', organization_uuid=uuid.uuid4(), is_global=True,
+        )
+        data = {
+            'country': 'ES',
+            'profiletype': profiletype.pk,
+        }
+        request = self.factory.post('', data)
+        request.session = self.session
+        view = SiteProfileViewSet.as_view({'post': 'create'})
+        response = view(request)
+        self.assertEqual(response.status_code, 201)
+        siteprofile = SiteProfile.objects.get(uuid=str(response.data['uuid']))
+        self.assertEqual(siteprofile.profiletype.pk, data['profiletype'])
 
     def test_create_missing_param(self):
         request = self.factory.post('', {})

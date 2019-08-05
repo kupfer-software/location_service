@@ -9,13 +9,14 @@ class LocationSerializerTest(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
 
-    def test_country_field(self):
+    def test_site_profile_serializer(self):
         site_profile = mfactories.SiteProfile()
         serializer = SiteProfileSerializer(site_profile)
 
         data = serializer.data
 
-        keys = ('uuid',
+        keys = ('id',
+                'uuid',
                 'organization_uuid',
                 'name',
                 'address_line1',

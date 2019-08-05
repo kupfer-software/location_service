@@ -1,3 +1,5 @@
+
+from django.db.models import Q
 from django.http import HttpRequest
 from django_filters import rest_framework as django_filters
 from rest_framework import viewsets, status
@@ -16,6 +18,7 @@ class OrganizationQuerySetMixin(object):
     Adds functionality to return a queryset filtered by the organization_uuid in the JWT header.
     If no jwt header is given, an empty queryset will be returned.
     """
+
     def get_queryset(self):
         queryset = super().get_queryset()
         organization_uuid = self.request.session.get('jwt_organization_uuid', None)
@@ -83,10 +86,28 @@ class ProfileTypeViewSet(OrganizationQuerySetMixin,
     Deletes the ProfileType with the given ID.
     """
 
+    def list(self, request, *args, **kwargs):
+        """
+        Filter for organization only if query-param is_global=False or
+        for organization AND global ProfileTypes.
+        """
+        if not request.query_params.get('is_global', 'false').lower() == 'true':
+            queryset = ProfileType.objects.all().filter(
+                Q(organization_uuid=self.request.session['jwt_organization_uuid']) |
+                Q(is_global=True))
+        else:
+            queryset = ProfileType.objects.all().filter(is_global=True)
+        queryset = self.filter_queryset(queryset)
+        queryset = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(queryset, many=True)
+        return self.get_paginated_response(serializer.data)
+
     queryset = ProfileType.objects.all()
     permission_classes = (OrganizationPermission,)
     serializer_class = ProfileTypeSerializer
-    filter_backends = (drf_filters.OrderingFilter,)
+    filter_backends = (django_filters.DjangoFilterBackend,
+                       drf_filters.OrderingFilter,)
+    filter_fields = ('is_global', )
     ordering = ('name',)
 
 
