@@ -39,28 +39,3 @@ pipeline:
     when:
       event: [tag]
       status: [success]
-
-  prebuild-docker-static-image:
-    image: python:3.6
-    commands:
-      - bash scripts/run-collectstatic.sh
-    when:
-      event: [tag]
-      status: [success]
-
-  build-docker-static-image-tag:
-    image: plugins/docker
-    insecure: true
-    registry:
-      from_secret: DOCKER_REGISTRY
-    repo:
-      from_secret: DOCKER_REPO_STATIC
-    dockerfile: Dockerfile.nginx
-    auto_tag: true
-    username:
-      from_secret: DOCKER_USERNAME
-    password:
-      from_secret: DOCKER_PASSWORD
-    when:
-      event: [tag]
-      status: [success]
