@@ -28,7 +28,7 @@ services:
     volumes:
       - .:/code
     ports:
-      - "8004:8080"
+      - "8005:8080"
     depends_on:
       - postgres_location_service
     environment:
